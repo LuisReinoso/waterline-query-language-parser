@@ -55,7 +55,7 @@ export default class Query {
    * @memberof Query
    */
   parseQueryDescripcion(query: string): string[] {
-    const regex = /[a-z ]+(?![a-zA-Z_0-9]*:)/g
+    const regex = /[a-zA-Z0-9-_ ]+(?![a-zA-Z_0-9]*:)/g
     let descripcion = []
     let match: any
 
