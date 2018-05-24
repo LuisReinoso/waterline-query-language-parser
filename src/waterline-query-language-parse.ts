@@ -1,20 +1,34 @@
-// Import here Polyfills if needed. Recommended core-js (npm i -D core-js)
-// import "core-js/fn/array.find"
-// ...
+import * as _ from 'lodash'
+
 export default class Query {
-  _etiquetas: string[]
-  _descripcion: string[]
-  _query: string
-  resultado: any
+  private _etiquetas: string[]
+  private _descripcion: string[]
+  private _modificadores: string[]
+  private _query: string
 
   constructor(query: string) {
     this._etiquetas = []
     this._descripcion = []
+    this._modificadores = []
     this._query = ''
 
     this._etiquetas = this.parseQueryEtiquetas(query)
     this._descripcion = this.parseQueryDescripcion(query)
-    this._query = this.construccionQuery(this.etiquetas, this.descripcion)
+    this._modificadores = this.parseQueryModificador(query)
+
+    if (
+      this._etiquetas.length === this._descripcion.length &&
+      this._etiquetas.length === this._modificadores.length &&
+      this._descripcion.length === this._modificadores.length
+    ) {
+      this._query = this.construccionQuery(
+        this._etiquetas,
+        this._descripcion,
+        this._modificadores
+      )
+    } else {
+      this._query = ''
+    }
   }
 
   get etiquetas(): string[] {
@@ -68,19 +82,58 @@ export default class Query {
     return descripcion
   }
 
+  parseQueryModificador(query: string): string[] {
+    const regex = /(:>=)|(:<=)|(:>)|(:<)|(:)/g
+    let modificador = []
+    let match: any
+
+    do {
+      match = regex.exec(query)
+      if (match) {
+        modificador.push(match[0].trim().substr(1))
+      }
+    } while (match)
+
+    return modificador
+  }
+
   /**
    * Construye el query de busqueda
    *
    * @param {string[]} etiquetas
    * @param {string[]} descripcion
+   * @param {string[]} modificadores
    * @returns {string}
    * @memberof Query
    */
-  construccionQuery(etiquetas: string[], descripcion: string[]): string {
-    let query = `where={"or":[${etiquetas.map(
-      (etiqueta, indice) =>
+  construccionQuery(
+    etiquetas: string[],
+    descripcion: string[],
+    modificadores: string[]
+  ): string {
+    let query = `where={"or":[${etiquetas.map((etiqueta, indice) => {
+      // excluye valores NaN cuando no son numeros
+      if (
+        _.isFinite(parseFloat(descripcion[indice])) &&
+        modificadores[indice].length > 0
+      ) {
+        return (
+          '{"' +
+          etiqueta +
+          '"' +
+          ':{"' +
+          modificadores[indice] +
+          '":' +
+          descripcion[indice] +
+          '}}'
+        )
+      } else if (_.isFinite(parseFloat(descripcion[indice]))) {
+        return '{"' + etiqueta + '"' + ':' + descripcion[indice] + '}'
+      }
+      return (
         '{"' + etiqueta + '"' + ':{"contains":"' + descripcion[indice] + '"}}'
-    )}]}`
+      )
+    })}]}`
     return query
   }
 }

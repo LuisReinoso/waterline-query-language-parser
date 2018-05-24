@@ -41,4 +41,18 @@ describe('Prueba para obtener query a partir de un query de entrada', () => {
       'where={"or":[{"etiquetas":{"contains":"papel"}},{"descripcion":{"contains":"papel blando"}}]}'
     )
   })
+
+  it('Deberia devolver query de busqueda con numeros sin comillas simples', () => {
+    query = new Query('etiquetas: 5 descripcion: papel blando')
+    expect(query.query).toEqual(
+      'where={"or":[{"etiquetas":5},{"descripcion":{"contains":"papel blando"}}]}'
+    )
+  })
+
+  it('Deberia devolver query de busqueda con numeros con el modificador mayor igual sin comillas simples', () => {
+    query = new Query('etiquetas:>= 5 descripcion: papel blando')
+    expect(query.query).toEqual(
+      'where={"or":[{"etiquetas":{">=":5}},{"descripcion":{"contains":"papel blando"}}]}'
+    )
+  })
 })
