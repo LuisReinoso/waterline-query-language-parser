@@ -1,6 +1,6 @@
 {
   "name": "waterline-query-language-parser",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "keywords": [],
   "main": "dist/waterline-query-language-parse.umd.js",
@@ -75,6 +75,7 @@
   },
   "devDependencies": {
     "@types/jest": "^22.0.0",
+    "@types/lodash": "^4.14.109",
     "@types/node": "^9.3.0",
     "colors": "^1.1.2",
     "commitizen": "^2.9.6",
