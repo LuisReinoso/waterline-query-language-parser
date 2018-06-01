@@ -1,4 +1,4 @@
-import * as _ from 'lodash'
+import isFinite from 'lodash/isFinite'
 
 export default class Query {
   private _etiquetas: string[]
@@ -114,7 +114,7 @@ export default class Query {
     let query = `where={"or":[${etiquetas.map((etiqueta, indice) => {
       // excluye valores NaN cuando no son numeros
       if (
-        _.isFinite(parseFloat(descripcion[indice])) &&
+        isFinite(parseFloat(descripcion[indice])) &&
         modificadores[indice].length > 0
       ) {
         return (
@@ -127,7 +127,7 @@ export default class Query {
           descripcion[indice] +
           '}}'
         )
-      } else if (_.isFinite(parseFloat(descripcion[indice]))) {
+      } else if (isFinite(parseFloat(descripcion[indice]))) {
         return '{"' + etiqueta + '"' + ':' + descripcion[indice] + '}'
       }
       return (
