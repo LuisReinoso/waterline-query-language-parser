@@ -55,4 +55,25 @@ describe('Prueba para obtener query a partir de un query de entrada', () => {
       'where={"or":[{"etiquetas":{">=":5}},{"descripcion":{"contains":"papel blando"}}]}'
     )
   })
+
+  it('Deberia devolver query de busqueda con fecha sin modificador, sin comillas simples', () => {
+    query = new Query('fechaInicio:2012/12/15')
+    expect(query.query).toEqual(
+      'where={"or":[{"fechaInicio":"2012-12-15T05:00:00.000Z"}]}'
+    )
+  })
+
+  it('Deberia devolver query de busqueda con fecha con el modificador mayor igual', () => {
+    query = new Query('fechaInicio:> 2018/06/05')
+    expect(query.query).toEqual(
+      'where={"or":[{"fechaInicio":{">":"2018-06-05T05:00:00.000Z"}}]}'
+    )
+  })
+
+  it('Deberia devolver query de busqueda con fechas con el modificador mayor y menor', () => {
+    query = new Query('fechaInicio: 2018/06/05-2018/12/15')
+    expect(query.query).toEqual(
+      'where={"or":[{"fechaInicio":{">":"2018-06-05T05:00:00.000Z","<":"2018-12-15T05:00:00.000Z"}}]}'
+    )
+  })
 })

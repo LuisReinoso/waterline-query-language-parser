@@ -69,7 +69,7 @@ export default class Query {
    * @memberof Query
    */
   parseQueryDescripcion(query: string): string[] {
-    const regex = /[a-zA-Z0-9-_ ]+(?![a-zA-Z_0-9]*:)/g
+    const regex = /[a-zA-Z0-9-_ /]+(?![a-zA-Z_0-9]*:)/g
     let descripcion = []
     let match: any
 
@@ -112,6 +112,46 @@ export default class Query {
     modificadores: string[]
   ): string {
     let query = `where={"or":[${etiquetas.map((etiqueta, indice) => {
+      // Comprobar si es fecha segun formato inicio-fin: YYYY/MM/DD-YYYY/MM/DD ó YYYY/MM/DD
+      let regexFecha = /[0-9]{4}\/[0-9]{2}\/[0-9]{2}-[0-9]{4}\/[0-9]{2}\/[0-9]{2}|[0-9]{4}\/[0-9]{2}\/[0-9]{2}/g
+      let isFormatoFecha = regexFecha.exec(descripcion[indice])
+      if (isFormatoFecha) {
+        // parse fecha si es que tiene dos logitudes
+        let fecha = isFormatoFecha[0].split('-')
+        if (fecha.length === 2) {
+          return (
+            '{"' +
+            etiqueta +
+            '"' +
+            ':{">":"' +
+            new Date(fecha[0]).toISOString() +
+            '","<":"' +
+            new Date(fecha[1]).toISOString() +
+            '"}}'
+          )
+        } else if (modificadores[indice].length > 0) {
+          return (
+            '{"' +
+            etiqueta +
+            '"' +
+            ':{"' +
+            modificadores[indice] +
+            '":"' +
+            new Date(fecha[0]).toISOString() +
+            '"}}'
+          )
+        } else {
+          return (
+            '{"' +
+            etiqueta +
+            '"' +
+            ':"' +
+            new Date(fecha[0]).toISOString() +
+            '"}'
+          )
+        }
+      }
+
       // excluye valores NaN cuando no son numeros
       if (
         isFinite(parseFloat(descripcion[indice])) &&
