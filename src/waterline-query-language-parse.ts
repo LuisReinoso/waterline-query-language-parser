@@ -48,7 +48,7 @@ export default class Query {
    * @param query
    */
   parseQueryEtiquetas(query: string): string[] {
-    const regex = /[A-Za-z][a-zA-Z0-9_]+(?=:)/g
+    const regex = /[A-Za-z][\.a-zA-Z0-9_]+(?=:)/g
     let etiquetas = []
     let match: any
 
@@ -69,7 +69,7 @@ export default class Query {
    * @memberof Query
    */
   parseQueryDescripcion(query: string): string[] {
-    const regex = /[a-zA-Z0-9-_ /]+(?![a-zA-Z_0-9]*:)/g
+    const regex = /[a-zA-Z0-9-_ /]+(?![\.a-zA-Z_0-9]*:)/g
     let descripcion = []
     let match: any
 
