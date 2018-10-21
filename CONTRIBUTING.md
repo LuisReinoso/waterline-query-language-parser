@@ -21,6 +21,8 @@ Estos pasos lo guiarán a través de la contribución a este proyecto:
 - Realiza y confirma tus cambios. `git add .` y `npm run commit`
 - Finalmente envíe una [GitHub Pull Request] (https://github.com/LuisReinoso/waterline-query-language-parser/compare?expand=1) con una lista clara de lo que ha hecho (lea más [acerca de pull solicitudes] (https://help.github.com/articles/about-pull-requests/)). Asegúrese de que todas sus confirmaciones sean atómicas (una característica por confirmación).
 
+---
+
 <a id="english"></a>
 ## Instructions
 We're really glad you're reading this, because we need volunteer developers to help this project come to fruition. 👏

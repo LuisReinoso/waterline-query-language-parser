@@ -107,6 +107,7 @@ Para saber más información sobre el query language de waterline visita [query-
 
 Ver [Guía de contribuciones](CONTRIBUTING.md)
 
+---
 
 <a id="english"></a>
 Since [sailsjs](sailsjs.com) provides a [blueprint-api](https://sailsjs.com/documentation/reference/blueprint-api). This library uses the path [find](https://sailsjs.com/documentation/reference/blueprint-api/find-where) to generate the `querystring where` and thus perform a complex search using tags.
