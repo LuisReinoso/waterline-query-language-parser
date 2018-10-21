@@ -12,23 +12,7 @@ export default class Query {
     this._modificadores = []
     this._query = ''
 
-    this._etiquetas = this.parseQueryEtiquetas(query)
-    this._descripcion = this.parseQueryDescripcion(query)
-    this._modificadores = this.parseQueryModificador(query)
-
-    if (
-      this._etiquetas.length === this._descripcion.length &&
-      this._etiquetas.length === this._modificadores.length &&
-      this._descripcion.length === this._modificadores.length
-    ) {
-      this._query = this.construccionQuery(
-        this._etiquetas,
-        this._descripcion,
-        this._modificadores
-      )
-    } else {
-      this._query = ''
-    }
+    this.addQuery(query)
   }
 
   get etiquetas(): string[] {
@@ -175,5 +159,37 @@ export default class Query {
       )
     })}]}`
     return query
+  }
+
+  /**
+   * Genera el query de busqueda a partir de un string
+   *
+   * @param {string} query
+   * @returns {Query}
+   * @memberof Query
+   */
+  public addQuery(query: string): Query {
+    let etiquetas = this.parseQueryEtiquetas(query)
+    let descripcion = this.parseQueryDescripcion(query)
+    let modificadores = this.parseQueryModificador(query)
+
+    if (
+      etiquetas.length === descripcion.length &&
+      descripcion.length === modificadores.length
+    ) {
+      this._etiquetas = this._etiquetas.concat(etiquetas)
+      this._descripcion = this._descripcion.concat(descripcion)
+      this._modificadores = this._modificadores.concat(modificadores)
+
+      this._query = this.construccionQuery(
+        this._etiquetas,
+        this._descripcion,
+        this._modificadores
+      )
+      return this
+    } else {
+      this._query = ''
+      return this
+    }
   }
 }

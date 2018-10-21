@@ -1,6 +1,6 @@
 import Query from '../src/waterline-query-language-parse'
 
-let query: any
+let query: Query
 
 beforeAll(() => {
   // query = new Query('etiquetas: papel descripcion: papel blando')
@@ -132,6 +132,33 @@ describe('Prueba para obtener query a partir de un query de entrada deep', () =>
     query = new Query('fechaInicio.grande: 2018/06/05-2018/12/15')
     expect(query.query).toEqual(
       'where={"or":[{"fechaInicio.grande":{">":"2018-06-05T05:00:00.000Z","<":"2018-12-15T05:00:00.000Z"}}]}'
+    )
+  })
+})
+
+describe('Prueba de builder pattern', () => {
+  it('Deberia devolver el objeto de la clase Query', () => {
+    query = new Query('etiquetas: papel')
+    expect(query.addQuery('nombre: Luis')).toBeInstanceOf(Query)
+  })
+
+  it('Deberia devolver dos etiquetas', () => {
+    query = new Query('etiquetas: papel')
+    query.addQuery('descripcion: papel blando')
+    expect(query.etiquetas.length).toBe(2)
+  })
+
+  it('Deberia devolver dos descripciones', () => {
+    query = new Query('etiquetas: papel')
+    query.addQuery('descripcion: papel blando')
+    expect(query.descripcion.length).toBe(2)
+  })
+
+  it('Deberia devolver el query de busqueda', () => {
+    query = new Query('etiquetas: papel')
+    query.addQuery('descripcion: papel blando')
+    expect(query.query).toEqual(
+      'where={"or":[{"etiquetas":{"contains":"papel"}},{"descripcion":{"contains":"papel blando"}}]}'
     )
   })
 })
