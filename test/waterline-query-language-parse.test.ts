@@ -72,16 +72,12 @@ describe('Prueba para obtener query a partir de un query de entrada', () => {
 
   it('Deberia devolver query de busqueda con fecha sin modificador, sin comillas simples', () => {
     query = new Query('fechaInicio:2012/12/15')
-    expect(query.query).toEqual(
-      'where={"or":[{"fechaInicio":"2012-12-15T05:00:00.000Z"}]}'
-    )
+    expect(query.query).toEqual('where={"or":[{"fechaInicio":"2012-12-15T05:00:00.000Z"}]}')
   })
 
   it('Deberia devolver query de busqueda con fecha con el modificador mayor igual', () => {
     query = new Query('fechaInicio:> 2018/06/05')
-    expect(query.query).toEqual(
-      'where={"or":[{"fechaInicio":{">":"2018-06-05T05:00:00.000Z"}}]}'
-    )
+    expect(query.query).toEqual('where={"or":[{"fechaInicio":{">":"2018-06-05T05:00:00.000Z"}}]}')
   })
 
   it('Deberia devolver query de busqueda con fechas con el modificador mayor y menor', () => {
@@ -116,9 +112,7 @@ describe('Prueba para obtener query a partir de un query de entrada deep', () =>
 
   it('Deberia devolver query de busqueda con fecha sin modificador, sin comillas simples', () => {
     query = new Query('fechaInicio.grande:2012/12/15')
-    expect(query.query).toEqual(
-      'where={"or":[{"fechaInicio.grande":"2012-12-15T05:00:00.000Z"}]}'
-    )
+    expect(query.query).toEqual('where={"or":[{"fechaInicio.grande":"2012-12-15T05:00:00.000Z"}]}')
   })
 
   it('Deberia devolver query de busqueda con fecha con el modificador mayor igual', () => {
@@ -160,5 +154,44 @@ describe('Prueba de builder pattern', () => {
     expect(query.query).toEqual(
       'where={"or":[{"etiquetas":{"contains":"papel"}},{"descripcion":{"contains":"papel blando"}}]}'
     )
+  })
+})
+
+describe('Prubas para construir el query con modificador igual', () => {
+  it('Deberia devoler el query con el parametro igual', () => {
+    query = new Query('nombre:= luis')
+    expect(query.query).toEqual('where={"nombre":"luis"}')
+  })
+
+  it('Deberia devoler el query con dos parametros igual', () => {
+    query = new Query('nombre:= luis')
+    query.addQuery('apellido:= perez')
+    expect(query.query).toEqual('where={"nombre":"luis","apellido":"perez"}')
+  })
+
+  it('Deberia devoler el query con dos parametros igual y or', () => {
+    query = new Query('nombre:= luis')
+    query.addQuery('apellido:= perez')
+    query.addQuery('ciudad: UIO')
+    expect(query.query).toEqual(
+      'where={"nombre":"luis","apellido":"perez","or":[{"ciudad":{"contains":"UIO"}}]}'
+    )
+  })
+
+  it('Deberia retornar un query vacio cuando el input sea una fecha igual', () => {
+    query = new Query('fecha:= 2018/12/01')
+    expect(query.query).toEqual('where={"fecha":"2018-12-01T05:00:00.000Z"}')
+  })
+})
+
+describe('Pruebas para posibles errores de input', () => {
+  it('Deberia retornar un query vacio cuando el input es vacio', () => {
+    query = new Query('')
+    expect(query.query).toEqual('')
+  })
+
+  it('Deberia retornar un query vacio cuando el input no tiene la estructora etiqueta:descripcion', () => {
+    query = new Query('sadasd')
+    expect(query.query).toEqual('')
   })
 })

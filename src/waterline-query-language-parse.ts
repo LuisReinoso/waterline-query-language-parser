@@ -67,7 +67,7 @@ export default class Query {
   }
 
   parseQueryModificador(query: string): string[] {
-    const regex = /(:>=)|(:<=)|(:>)|(:<)|(:)/g
+    const regex = /(:>=)|(:<=)|(:>)|(:<)|(:=)|(:)/g
     let modificador = []
     let match: any
 
@@ -90,12 +90,8 @@ export default class Query {
    * @returns {string}
    * @memberof Query
    */
-  construccionQuery(
-    etiquetas: string[],
-    descripcion: string[],
-    modificadores: string[]
-  ): string {
-    let query = `where={"or":[${etiquetas.map((etiqueta, indice) => {
+  construccionQuery(etiquetas: string[], descripcion: string[], modificadores: string[]): string {
+    let etiquetasConCategoria = etiquetas.map((etiqueta, indice) => {
       // Comprobar si es fecha segun formato inicio-fin: YYYY/MM/DD-YYYY/MM/DD ó YYYY/MM/DD
       let regexFecha = /[0-9]{4}\/[0-9]{2}\/[0-9]{2}-[0-9]{4}\/[0-9]{2}\/[0-9]{2}|[0-9]{4}\/[0-9]{2}\/[0-9]{2}/g
       let isFormatoFecha = regexFecha.exec(descripcion[indice])
@@ -103,61 +99,98 @@ export default class Query {
         // parse fecha si es que tiene dos logitudes
         let fecha = isFormatoFecha[0].split('-')
         if (fecha.length === 2) {
-          return (
-            '{"' +
-            etiqueta +
-            '"' +
-            ':{">":"' +
-            new Date(fecha[0]).toISOString() +
-            '","<":"' +
-            new Date(fecha[1]).toISOString() +
-            '"}}'
-          )
+          return {
+            categoria: 'or',
+            valor:
+              '{"' +
+              etiqueta +
+              '"' +
+              ':{">":"' +
+              new Date(fecha[0]).toISOString() +
+              '","<":"' +
+              new Date(fecha[1]).toISOString() +
+              '"}}'
+          }
         } else if (modificadores[indice].length > 0) {
-          return (
+          if (modificadores[indice] === '=') {
+            return {
+              categoria: 'equal',
+              valor: '"' + etiqueta + '":"' + new Date(fecha[0]).toISOString() + '"'
+            }
+          } else {
+            return {
+              categoria: 'or',
+              valor:
+                '{"' +
+                etiqueta +
+                '"' +
+                ':{"' +
+                modificadores[indice] +
+                '":"' +
+                new Date(fecha[0]).toISOString() +
+                '"}}'
+            }
+          }
+        } else {
+          return {
+            categoria: 'or',
+            valor: '{"' + etiqueta + '"' + ':"' + new Date(fecha[0]).toISOString() + '"}'
+          }
+        }
+      }
+
+      // cuando se requiere que el campo sea igual, independiente de que sea
+      // numero string
+      if (modificadores[indice] === '=') {
+        return {
+          categoria: 'equal',
+          valor: '"' + etiqueta + '":"' + descripcion[indice] + '"'
+        }
+      }
+
+      // excluye valores NaN cuando no son numeros
+      if (isFinite(parseFloat(descripcion[indice])) && modificadores[indice].length > 0) {
+        return {
+          categoria: 'or',
+          valor:
             '{"' +
             etiqueta +
             '"' +
             ':{"' +
             modificadores[indice] +
-            '":"' +
-            new Date(fecha[0]).toISOString() +
-            '"}}'
-          )
-        } else {
-          return (
-            '{"' +
-            etiqueta +
-            '"' +
-            ':"' +
-            new Date(fecha[0]).toISOString() +
-            '"}'
-          )
+            '":' +
+            descripcion[indice] +
+            '}}'
+        }
+      } else if (isFinite(parseFloat(descripcion[indice]))) {
+        return {
+          categoria: 'or',
+          valor: '{"' + etiqueta + '"' + ':' + descripcion[indice] + '}'
         }
       }
-
-      // excluye valores NaN cuando no son numeros
-      if (
-        isFinite(parseFloat(descripcion[indice])) &&
-        modificadores[indice].length > 0
-      ) {
-        return (
-          '{"' +
-          etiqueta +
-          '"' +
-          ':{"' +
-          modificadores[indice] +
-          '":' +
-          descripcion[indice] +
-          '}}'
-        )
-      } else if (isFinite(parseFloat(descripcion[indice]))) {
-        return '{"' + etiqueta + '"' + ':' + descripcion[indice] + '}'
+      return {
+        categoria: 'or',
+        valor: '{"' + etiqueta + '"' + ':{"contains":"' + descripcion[indice] + '"}}'
       }
-      return (
-        '{"' + etiqueta + '"' + ':{"contains":"' + descripcion[indice] + '"}}'
-      )
-    })}]}`
+    })
+
+    const categoriaEqual = etiquetasConCategoria
+      .filter(etiqueta => etiqueta.categoria === 'equal')
+      .map(etiqueta => etiqueta.valor)
+    const categoriaOr = etiquetasConCategoria
+      .filter(etiqueta => etiqueta.categoria === 'or')
+      .map(etiqueta => etiqueta.valor)
+
+    let query = `where={"or":[]}`
+    if (categoriaEqual.length > 0 && categoriaOr.length > 0) {
+      query = `where={${categoriaEqual},"or":[${categoriaOr}]}`
+    } else if (categoriaEqual.length > 0 && categoriaOr.length === 0) {
+      query = `where={${categoriaEqual}}`
+    } else if (categoriaOr.length > 0 && categoriaEqual.length === 0) {
+      query = `where={"or":[${categoriaOr}]}`
+    } else {
+      query = ''
+    }
     return query
   }
 
@@ -173,19 +206,12 @@ export default class Query {
     let descripcion = this.parseQueryDescripcion(query)
     let modificadores = this.parseQueryModificador(query)
 
-    if (
-      etiquetas.length === descripcion.length &&
-      descripcion.length === modificadores.length
-    ) {
+    if (etiquetas.length === descripcion.length && descripcion.length === modificadores.length) {
       this._etiquetas = this._etiquetas.concat(etiquetas)
       this._descripcion = this._descripcion.concat(descripcion)
       this._modificadores = this._modificadores.concat(modificadores)
 
-      this._query = this.construccionQuery(
-        this._etiquetas,
-        this._descripcion,
-        this._modificadores
-      )
+      this._query = this.construccionQuery(this._etiquetas, this._descripcion, this._modificadores)
       return this
     } else {
       this._query = ''
