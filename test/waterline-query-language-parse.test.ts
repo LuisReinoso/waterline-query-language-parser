@@ -191,6 +191,20 @@ describe('Prubas para construir el query con modificador igual', () => {
   })
 })
 
+describe('Pruebas para modificador in', () => {
+  it('Deberia retornar un query con el modificador in', () => {
+    query = new Query('nombre:# casa&sadasd')
+    expect(query.query).toEqual('where={"nombre":{"in":["casa","sadasd"]}}')
+  })
+
+  it('Deberia retornar un query con el modificador in con el modificador or', () => {
+    query = new Query('nombre:# casa&sadasd apellido:pedernales')
+    expect(query.query).toEqual(
+      'where={"or":[{"apellido":{"contains":"pedernales"}}],"nombre":{"in":["casa","sadasd"]}}'
+    )
+  })
+})
+
 describe('Pruebas para posibles errores de input', () => {
   it('Deberia retornar un query vacio cuando el input es vacio', () => {
     query = new Query('')

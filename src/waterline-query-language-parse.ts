@@ -53,7 +53,7 @@ export default class Query {
    * @memberof Query
    */
   parseQueryDescripcion(query: string): string[] {
-    const regex = /[a-zA-Z0-9-_ /]+(?![\.a-zA-Z_0-9]*:)/g
+    const regex = /[a-zA-Z0-9-_ &/]+(?![\.a-zA-Z_0-9]*:)/g
     let descripcion = []
     let match: any
 
@@ -67,7 +67,7 @@ export default class Query {
   }
 
   parseQueryModificador(query: string): string[] {
-    const regex = /(:>=)|(:<=)|(:>)|(:<)|(:=)|(:)/g
+    const regex = /(:>=)|(:<=)|(:>)|(:<)|(:=)|(:#)|(:)/g
     let modificador = []
     let match: any
 
@@ -94,7 +94,9 @@ export default class Query {
     let etiquetasConCategoria = etiquetas.map((etiqueta, indice) => {
       // Comprobar si es fecha segun formato inicio-fin: YYYY/MM/DD-YYYY/MM/DD ó YYYY/MM/DD
       let regexFecha = /[0-9]{4}\/[0-9]{2}\/[0-9]{2}-[0-9]{4}\/[0-9]{2}\/[0-9]{2}|[0-9]{4}\/[0-9]{2}\/[0-9]{2}/g
+      let regexIn = /&/g
       let isFormatoFecha = regexFecha.exec(descripcion[indice])
+      let isMultipleInputs = regexIn.exec(descripcion[indice])
       if (isFormatoFecha) {
         // parse fecha si es que tiene dos logitudes
         let fecha = isFormatoFecha[0].split('-')
@@ -157,6 +159,16 @@ export default class Query {
         }
       }
 
+      if (isMultipleInputs) {
+        if (modificadores[indice] === '#') {
+          let inputs = descripcion[indice].split('&')
+          return {
+            categoria: 'in',
+            valor: '"' + etiqueta + '":{"in":[' + inputs.map(palabra => '"' + palabra + '"') + ']}'
+          }
+        }
+      }
+
       // cuando se requiere que el campo sea igual, independiente de que sea
       // numero string
       if (modificadores[indice] === '=') {
@@ -198,14 +210,33 @@ export default class Query {
     const categoriaOr = etiquetasConCategoria
       .filter(etiqueta => etiqueta.categoria === 'or')
       .map(etiqueta => etiqueta.valor)
+    const categoriaIn = etiquetasConCategoria
+      .filter(etiqueta => etiqueta.categoria === 'in')
+      .map(etiqueta => etiqueta.valor)
 
     let query = `where={"or":[]}`
-    if (categoriaEqual.length > 0 && categoriaOr.length > 0) {
-      query = `where={${categoriaEqual},"or":[${categoriaOr}]}`
-    } else if (categoriaEqual.length > 0 && categoriaOr.length === 0) {
-      query = `where={${categoriaEqual}}`
-    } else if (categoriaOr.length > 0 && categoriaEqual.length === 0) {
-      query = `where={"or":[${categoriaOr}]}`
+
+    let auxQuery = ''
+    if (categoriaEqual.length > 0) {
+      auxQuery += categoriaEqual
+    }
+    if (categoriaOr.length > 0) {
+      if (auxQuery) {
+        auxQuery += ',"or":[' + categoriaOr + ']'
+      } else {
+        auxQuery += '"or":[' + categoriaOr + ']'
+      }
+    }
+    if (categoriaIn.length > 0) {
+      if (auxQuery) {
+        auxQuery += ',' + categoriaIn
+      } else {
+        auxQuery += categoriaIn
+      }
+    }
+
+    if (auxQuery) {
+      query = `where={${auxQuery}}`
     } else {
       query = ''
     }
