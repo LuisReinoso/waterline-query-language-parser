@@ -98,18 +98,36 @@ export default class Query {
       if (isFormatoFecha) {
         // parse fecha si es que tiene dos logitudes
         let fecha = isFormatoFecha[0].split('-')
+
         if (fecha.length === 2) {
-          return {
-            categoria: 'or',
-            valor:
-              '{"' +
-              etiqueta +
-              '"' +
-              ':{">":"' +
-              new Date(fecha[0]).toISOString() +
-              '","<":"' +
-              new Date(fecha[1]).toISOString() +
-              '"}}'
+          if (modificadores[indice] === '=') {
+            return {
+              categoria: 'equal',
+              valor:
+                '"' +
+                etiqueta +
+                '"' +
+                ':{">=":"' +
+                new Date(fecha[0]).toISOString() +
+                '"}, "' +
+                etiqueta +
+                '":{"<=":"' +
+                new Date(fecha[1]).toISOString() +
+                '"}'
+            }
+          } else {
+            return {
+              categoria: 'or',
+              valor:
+                '{"' +
+                etiqueta +
+                '"' +
+                ':{">":"' +
+                new Date(fecha[0]).toISOString() +
+                '","<":"' +
+                new Date(fecha[1]).toISOString() +
+                '"}}'
+            }
           }
         } else if (modificadores[indice].length > 0) {
           if (modificadores[indice] === '=') {

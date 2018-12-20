@@ -182,6 +182,13 @@ describe('Prubas para construir el query con modificador igual', () => {
     query = new Query('fecha:= 2018/12/01')
     expect(query.query).toEqual('where={"fecha":"2018-12-01T05:00:00.000Z"}')
   })
+
+  it('Deberia retornar un query cuando el input sea a un rango de fecha', () => {
+    query = new Query('fecha:= 2018/10/01-2018/12/15')
+    expect(query.query).toEqual(
+      'where={"fecha":{">=":"2018-10-01T05:00:00.000Z"}, "fecha":{"<=":"2018-12-15T05:00:00.000Z"}}'
+    )
+  })
 })
 
 describe('Pruebas para posibles errores de input', () => {
