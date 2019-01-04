@@ -211,4 +211,4 @@ To know more information about the query language of waterline visit [query-lang
 
 ## Contributions
 
-See [Contributions Guide] (CONTRIBUTING.md)
+See [Contributions Guide](CONTRIBUTING.md)
