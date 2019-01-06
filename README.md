@@ -207,7 +207,7 @@ parser.query // where={"or":[{"fechaInicio":{">":"2018-06-05T05:00:00.000Z","<":
 
 ## References
 
-To know more information about the query language of waterline visit [query-language] (https://sailsjs.com/documentation/concepts/models-and-orm/query-language).
+To know more information about the query language of waterline visit [query-language](https://sailsjs.com/documentation/concepts/models-and-orm/query-language).
 
 ## Contributions
 
