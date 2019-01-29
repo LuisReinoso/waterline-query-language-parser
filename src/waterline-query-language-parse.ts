@@ -5,12 +5,14 @@ export default class Query {
   private _descripcion: string[]
   private _modificadores: string[]
   private _query: string
+  private _queryGenerador: string
 
   constructor(query: string) {
     this._etiquetas = []
     this._descripcion = []
     this._modificadores = []
     this._query = ''
+    this._queryGenerador = ''
 
     this.addQuery(query)
   }
@@ -25,6 +27,10 @@ export default class Query {
 
   get query(): string {
     return this._query
+  }
+
+  get queryGenerador(): string {
+    return this._queryGenerador
   }
 
   /**
@@ -251,6 +257,7 @@ export default class Query {
    * @memberof Query
    */
   public addQuery(query: string): Query {
+    this._queryGenerador += ` ${query}`
     let etiquetas = this.parseQueryEtiquetas(query)
     let descripcion = this.parseQueryDescripcion(query)
     let modificadores = this.parseQueryModificador(query)

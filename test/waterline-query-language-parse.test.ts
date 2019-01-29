@@ -216,3 +216,16 @@ describe('Pruebas para posibles errores de input', () => {
     expect(query.query).toEqual('')
   })
 })
+
+describe('Prueba para obtener el query generador query simple', () => {
+  it('Deberia query inicial', () => {
+    query = new Query('etiquetas: Papel')
+    expect(query.queryGenerador).toEqual(' etiquetas: Papel')
+  })
+
+  it('Deberia query inicial mas el query añadido despues', () => {
+    query = new Query('etiquetas: Papel')
+    query.addQuery('prueba: categoria')
+    expect(query.queryGenerador).toEqual(' etiquetas: Papel prueba: categoria')
+  })
+})
