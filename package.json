@@ -1,6 +1,6 @@
 {
   "name": "waterline-query-language-parser",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "Generador de query de busqueda compatible con waterline query language",
   "keywords": [
     "sailsjs",

@@ -127,14 +127,14 @@ export default class Query {
             return {
               categoria: 'or-equal',
               valor:
-                '{"' +
+                '"' +
                 etiqueta +
                 '"' +
                 ':{">":"' +
                 new Date(fecha[0]).toISOString() +
                 '","<":"' +
                 new Date(fecha[1]).toISOString() +
-                '"}}'
+                '"}'
             }
           } else {
             return {
@@ -208,14 +208,14 @@ export default class Query {
           return {
             categoria: 'or-equal',
             valor:
-              '{"' +
+              '"' +
               etiqueta +
               '"' +
               ':{"' +
               modificadores[indice] +
               '":' +
               descripcion[indice] +
-              '}}'
+              '}'
           }
         } else {
           return {
@@ -235,7 +235,7 @@ export default class Query {
         if (modificadores[indice] === '+') {
           return {
             categoria: 'or-equal',
-            valor: '{"' + etiqueta + '"' + ':' + descripcion[indice] + '}'
+            valor: '"' + etiqueta + '"' + ':' + descripcion[indice] + ''
           }
         } else {
           return {
@@ -248,7 +248,7 @@ export default class Query {
       if (modificadores[indice] === '+') {
         return {
           categoria: 'or-equal',
-          valor: '{"' + etiqueta + '"' + ':{"contains":"' + descripcion[indice] + '"}}'
+          valor: '"' + etiqueta + '"' + ':{"contains":"' + descripcion[indice] + '"}'
         }
       } else {
         return {
