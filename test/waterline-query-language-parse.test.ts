@@ -205,6 +205,22 @@ describe('Pruebas para modificador in', () => {
   })
 })
 
+describe('Pruebas para modificador or-equal', () => {
+  it('Deberia retornar un query con el modificador or-equal', () => {
+    query = new Query('nombre:+ casa&sadasd apellido:+ perez')
+    expect(query.query).toEqual(
+      'where={{"nombre":{"contains":"casa&sadasd"}},{"apellido":{"contains":"perez"}}}'
+    )
+  })
+
+  it('Deberia retornar un query con el modificador or-equal con in', () => {
+    query = new Query('nombre:+ casa&sadasd apellido:+ perez codigo:# hola&adios')
+    expect(query.query).toEqual(
+      'where={"codigo":{"in":["hola","adios"]},{"nombre":{"contains":"casa&sadasd"}},{"apellido":{"contains":"perez"}}}'
+    )
+  })
+})
+
 describe('Pruebas para posibles errores de input', () => {
   it('Deberia retornar un query vacio cuando el input es vacio', () => {
     query = new Query('')

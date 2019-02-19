@@ -73,7 +73,7 @@ export default class Query {
   }
 
   parseQueryModificador(query: string): string[] {
-    const regex = /(:>=)|(:<=)|(:>)|(:<)|(:=)|(:#)|(:)/g
+    const regex = /(:>=)|(:<=)|(:>)|(:<)|(:=)|(:#)|(:\+)|(:)/g
     let modificador = []
     let match: any
 
@@ -123,6 +123,19 @@ export default class Query {
                 new Date(fecha[1]).toISOString() +
                 '"}'
             }
+          } else if (modificadores[indice] === '+') {
+            return {
+              categoria: 'or-equal',
+              valor:
+                '{"' +
+                etiqueta +
+                '"' +
+                ':{">":"' +
+                new Date(fecha[0]).toISOString() +
+                '","<":"' +
+                new Date(fecha[1]).toISOString() +
+                '"}}'
+            }
           } else {
             return {
               categoria: 'or',
@@ -141,6 +154,11 @@ export default class Query {
           if (modificadores[indice] === '=') {
             return {
               categoria: 'equal',
+              valor: '"' + etiqueta + '":"' + new Date(fecha[0]).toISOString() + '"'
+            }
+          } else if (modificadores[indice] === '+') {
+            return {
+              categoria: 'or-equal',
               valor: '"' + etiqueta + '":"' + new Date(fecha[0]).toISOString() + '"'
             }
           } else {
@@ -186,27 +204,57 @@ export default class Query {
 
       // excluye valores NaN cuando no son numeros
       if (isFinite(parseFloat(descripcion[indice])) && modificadores[indice].length > 0) {
-        return {
-          categoria: 'or',
-          valor:
-            '{"' +
-            etiqueta +
-            '"' +
-            ':{"' +
-            modificadores[indice] +
-            '":' +
-            descripcion[indice] +
-            '}}'
+        if (modificadores[indice] === '+') {
+          return {
+            categoria: 'or-equal',
+            valor:
+              '{"' +
+              etiqueta +
+              '"' +
+              ':{"' +
+              modificadores[indice] +
+              '":' +
+              descripcion[indice] +
+              '}}'
+          }
+        } else {
+          return {
+            categoria: 'or',
+            valor:
+              '{"' +
+              etiqueta +
+              '"' +
+              ':{"' +
+              modificadores[indice] +
+              '":' +
+              descripcion[indice] +
+              '}}'
+          }
         }
       } else if (isFinite(parseFloat(descripcion[indice]))) {
-        return {
-          categoria: 'or',
-          valor: '{"' + etiqueta + '"' + ':' + descripcion[indice] + '}'
+        if (modificadores[indice] === '+') {
+          return {
+            categoria: 'or-equal',
+            valor: '{"' + etiqueta + '"' + ':' + descripcion[indice] + '}'
+          }
+        } else {
+          return {
+            categoria: 'or',
+            valor: '{"' + etiqueta + '"' + ':' + descripcion[indice] + '}'
+          }
         }
       }
-      return {
-        categoria: 'or',
-        valor: '{"' + etiqueta + '"' + ':{"contains":"' + descripcion[indice] + '"}}'
+
+      if (modificadores[indice] === '+') {
+        return {
+          categoria: 'or-equal',
+          valor: '{"' + etiqueta + '"' + ':{"contains":"' + descripcion[indice] + '"}}'
+        }
+      } else {
+        return {
+          categoria: 'or',
+          valor: '{"' + etiqueta + '"' + ':{"contains":"' + descripcion[indice] + '"}}'
+        }
       }
     })
 
@@ -218,6 +266,9 @@ export default class Query {
       .map(etiqueta => etiqueta.valor)
     const categoriaIn = etiquetasConCategoria
       .filter(etiqueta => etiqueta.categoria === 'in')
+      .map(etiqueta => etiqueta.valor)
+    const categoriaOrEqual = etiquetasConCategoria
+      .filter(etiqueta => etiqueta.categoria === 'or-equal')
       .map(etiqueta => etiqueta.valor)
 
     let query = `where={"or":[]}`
@@ -238,6 +289,13 @@ export default class Query {
         auxQuery += ',' + categoriaIn
       } else {
         auxQuery += categoriaIn
+      }
+    }
+    if (categoriaOrEqual.length > 0) {
+      if (auxQuery) {
+        auxQuery += ',' + categoriaOrEqual
+      } else {
+        auxQuery += categoriaOrEqual
       }
     }
 
